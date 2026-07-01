@@ -4,6 +4,8 @@
   "private": true,
   "description": "Monorepo for the Zhiroszhigatel Telegram Mini App platform.",
   "scripts": {
+    "start": "npm run backend:start",
+    "postinstall": "npm run install:all",
     "backend:start": "npm --prefix apps/backend start",
     "bot:start": "npm --prefix apps/telegram-bot start",
     "backend:install": "npm --prefix apps/backend install",

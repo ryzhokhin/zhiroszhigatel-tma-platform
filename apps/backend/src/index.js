@@ -4,14 +4,24 @@ const cors = require('cors');
 require('dotenv').config(); // Не обязателен, если Railway подставит переменные
 
 const app = express();
-// app.use(cors());
 app.use(bodyParser.json());
 
+const allowedOrigins = (process.env.CORS_ORIGIN || 'https://zhiroazhigatel.netlify.app')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 app.use(cors({
-    origin: 'https://zhiroazhigatel.netlify.app', // Укажите URL вашего фронтенда
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error(`CORS origin not allowed: ${origin}`));
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, // Разрешите отправку cookies/credentials
-    allowedHeaders: ['Content-Type']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Telegram-Init-Data', 'Telegram-Init-Data']
 }));
 
 // testing without headers
@@ -41,6 +51,13 @@ const mealsRoutes = require('./routes/mealsRoutes');
 const trainingPlansRoutes = require('./routes/trainingPlansRoutes');
 
 
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'Zhiroszhigatel backend is running' });
+});
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
 
 // routes application
 app.use('/test', testRoutes);
